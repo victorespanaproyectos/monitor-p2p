@@ -1,0 +1,4 @@
+// CSRF for every mutation. Bootstrap JSON is produced only after authorization.
+window.P2P_CONTEXT=JSON.parse(document.getElementById('p2p-bootstrap').textContent);
+const nativeFetch=window.fetch.bind(window);
+window.fetch=(input,options={})=>{const method=(options.method||'GET').toUpperCase();const url=new URL(typeof input==='string'?input:input.url,location.origin);if(url.origin===location.origin && !['GET','HEAD','OPTIONS'].includes(method)){const token=document.cookie.split('; ').find(c=>c.startsWith('csrftoken='))?.split('=').slice(1).join('=');options={...options,headers:{...options.headers,'X-CSRFToken':decodeURIComponent(token||'')},credentials:'same-origin'};}return nativeFetch(input,options).then(response=>{if(response.ok && url.origin===location.origin && !["GET","HEAD","OPTIONS"].includes(method) && url.pathname.startsWith("/api/"))window.dispatchEvent(new Event("p2p-data-changed"));return response;});};
