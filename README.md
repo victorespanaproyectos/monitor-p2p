@@ -1,65 +1,111 @@
-# Monitor P2P y gestor de operaciones — Python 1.4.2
+# Monitor P2P
 
-Aplicación web de portfolio para comparar anuncios Binance P2P y gestionar órdenes, cuentas, inventario y movimientos de varios operadores. Backend Django/Python; interfaz HTML, CSS y JavaScript; PostgreSQL para despliegue y SQLite para uso local. La aplicación no realiza compras, ventas ni transferencias en Binance.
+Aplicación web para consultar anuncios de Binance P2P y llevar el control de operaciones, cuentas y saldos desde un mismo lugar.
 
-## Ajustes de cabecera y avisos (1.4.2)
+El proyecto reúne la comparación de precios con el seguimiento de la operativa: permite calcular costos antes de registrar una orden, reservar fondos mientras está pendiente y revisar los resultados cuando se completa. Cada operador mantiene sus propias cuentas, movimientos e historial.
 
-Icono Binance junto a la campana, manteniendo el mercado UYU o USD del enlace original. Los avisos leídos desaparecen del desplegable; abrir su acción marca ese aviso como leído, y «Marcar como leídas» retira todos los visibles. Los avisos ya leídos de versiones anteriores tampoco se muestran. No se borran las referencias que evitan repetir alertas.
-
-## Diseño de notificaciones
-
-Campana SVG junto al selector de tema, sin texto, con contador flotante y panel desplegable bajo la campana. Tarjetas con iconos, colores según el aviso y acciones, adaptadas a modo claro, oscuro y móvil.
-
-## Notificaciones (1.4)
-
-Campana y panel de avisos por operador: cambios de anuncios propios, órdenes pendientes, saldo disponible bajo y fallos del mercado. Configuración, sonido opcional y avisos del navegador con permiso. Lee [docs/NOTIFICACIONES-1.4.md](docs/NOTIFICACIONES-1.4.md).
-
-## Corrección de creación de órdenes (1.3.1)
-
-Crear Orden comprueba las cuentas disponibles y abre el formulario. Si no hay cuentas, muestra un enlace a Inventario. Las cuentas creadas en otra pestaña se actualizan al volver, conservando el borrador. Un fallo de consulta vuelve a habilitar el botón; no queda bloqueado.
-
-## Anunciantes y filtro por monto (1.3)
-
-Haz clic en un anunciante para consultar sus anuncios públicos en un modal. Filtra las listas por monto en UYU, USD o USDT, comprobando mínimo, máximo efectivo y disponibilidad. Lee [docs/MERCADO-1.3.md](docs/MERCADO-1.3.md).
-
-## Cuentas e iconos (1.2)
-
-Inventario sin cuentas precargadas para instalaciones u operadores nuevos, creación de cuentas desde el inventario, opción para quitar y reactivar cuentas e iconos locales de bancos y billeteras en el mercado. Lee [docs/CUENTAS-1.2.md](docs/CUENTAS-1.2.md).
-
-## Primera fase de mejoras
-
-Estados pendiente/completada/cancelada, reservas de saldo, costos porcentuales y fijos, conciliación con motivo e historial. **Antes de actualizar, sigue [docs/FASE-1.md](docs/FASE-1.md)** para conservar la base de datos y el acceso.
+Está desarrollado con **Python, Django y JavaScript**, con **SQLite** para el uso local y configuración disponible para **PostgreSQL**.
 
 ## Funcionalidades
 
-- Inicio de sesión y Administrador inicial. Alta, edición y desactivación de operadores; usuario Binance y comisión configurables.
-- Usuarios con acceso solo a operadores asignados. Administrador puede gestionar todos.
-- Cuentas configurables en UYU o USD, Binance USDT único y conciliación manual de saldos.
-- Mercado UYU y USD/Airtm, varios medios seleccionados, spreads recomendados y Top 5, posición y resaltado del anuncio propio, estados de conexión y recarga automática.
-- Calculadora después de los spreads y antes de los anuncios. No comprueba demanda ni disponibilidad para completar la operación.
-- Crear y editar órdenes mediante modal, comprobantes privados, filtros, exportación CSV, informes FIFO separados por moneda y reserva del 10% de ganancia positiva.
-- Depósitos y retiros mediante modal, historial y correcciones automáticas del saldo.
-- Inventario de los operadores autorizados, observación del día anterior y variación ajustada por retiros.
-- Importación JSON con revisión y confirmación, sin duplicar órdenes. Respaldo con adjuntos incrustados cuando están disponibles.
-- Modo claro/oscuro, datos ficticios de ejemplo y registro de acciones.
+### Mercado P2P
 
-## Requisitos
+- Consulta de anuncios de compra y venta de USDT en UYU y USD/Airtm.
+- Selección de varios medios de pago, identificados con sus iconos.
+- Filtro por monto en moneda local o USDT, considerando límites y disponibilidad.
+- Consulta de los anuncios públicos de un anunciante desde su nombre.
+- Referencias de spread, recomendaciones y ranking de medios de pago.
+- Identificación de anuncios propios y de anuncios con el mismo mínimo.
+- Actualización automática con intervalos configurables.
 
-Python 3.12 o superior, pip, acceso a Internet para instalar dependencias. Para mercado real, acceso a Binance y disponibilidad de sus endpoints web. PostgreSQL 16 o Docker Compose para la opción de despliegue. La aplicación local no necesita Node.js.
+### Calculadora de operaciones
 
-## Arranque en Windows
+Estimación de compras y ventas a partir del precio y el monto. Contempla la comisión de Binance configurada para el operador, cobrada en USDT, y cargos adicionales porcentuales o fijos en la moneda de la operación.
 
-1. Extrae el ZIP en una carpeta diferente de la aplicación anterior. No copies la carpeta data encima de esta versión.
-2. Instala Python y verifica `py -3 --version` en una terminal.
-3. Ejecuta `iniciar-windows.bat`.
-4. En el primer arranque elige la contraseña del usuario **admin**. Debe cumplir las reglas mostradas. No hay contraseña predefinida.
-5. Abre http://127.0.0.1:8000 e inicia sesión.
+Los cargos adicionales se registran por separado para evitar confundirlos con la comisión de Binance.
 
-El script instala dependencias, crea las tablas y solicita la contraseña solo si aún no existe Administrador. Para recuperar acceso usa `python manage.py changepassword admin` dentro del entorno virtual; no borres la base.
+### Órdenes
 
-## Arranque manual en Linux / WSL
+- Registro de compras y ventas con fecha, número de orden, cuenta y medio de pago.
+- Estados pendiente, completada y cancelada.
+- Reserva de fondos para órdenes pendientes y liberación al cancelarlas.
+- Edición de registros y adjuntos de comprobantes privados.
+- Filtros por fecha, moneda, tipo y estado.
+- Exportación CSV e importación JSON con revisión previa y control de duplicados.
+
+### Cuentas e inventario
+
+Cada operador crea las cuentas que utiliza, en UYU o USD, y registra su saldo de Binance en USDT. La instalación comienza sin cuentas bancarias precargadas.
+
+El inventario distingue saldo total, reservado y disponible. Incluye depósitos, retiros, conciliación de saldos con motivo e historial de ajustes. Las cuentas vacías y sin órdenes pendientes pueden archivarse y reactivarse conservando sus registros.
+
+### Reportes
+
+- Totales de compras, ventas, comisiones y gastos.
+- Resultados por período y ranking de medios de pago.
+- Cálculo de ganancias mediante FIFO: las ventas se vinculan primero con las compras más antiguas.
+- Informes separados en UYU y USD.
+- Valoración estimada del inventario y comparación con el día anterior.
+- Indicador del 10 % de la ganancia positiva, como referencia de reserva.
+
+Los gastos de compra se incorporan al costo y los de venta reducen el ingreso. Cuando falta información del costo de compra, el resultado se identifica como parcial. Los depósitos, retiros y conciliaciones no se consideran ganancias.
+
+### Notificaciones
+
+La campana junto al selector de tema muestra los avisos del operador seleccionado:
+
+- Cambios de precio, disponibilidad o límites en anuncios propios.
+- Órdenes registradas que superan el tiempo configurado como pendientes.
+- Saldo disponible que cae por debajo del mínimo definido para una cuenta.
+- Fallos de actualización del mercado.
+
+Cada tipo puede activarse por separado. El sonido y las notificaciones del navegador son opcionales. Los avisos leídos desaparecen del panel y del contador.
+
+Las consultas de avisos se realizan cada 30 segundos con la página abierta y visible. La primera lectura de un anuncio establece la referencia de comparación. Un cambio de anuncio no confirma la creación de una orden ni genera registros automáticamente.
+
+### Acceso y personalización
+
+- Administración de operadores y asignación de usuarios.
+- Acceso a la información de los operadores autorizados.
+- Usuario Binance y comisión configurables por operador.
+- Interfaz adaptable y temas claro y oscuro.
+
+## Alcance
+
+Monitor P2P consulta información pública y registra la actividad que se carga en la aplicación. Las compras, ventas y transferencias se realizan fuera del monitor.
+
+Los saldos bancarios se ingresan y concilian manualmente. Las cotizaciones, los spreads y la valoración del inventario son referencias para analizar operaciones; no garantizan disponibilidad ni ganancias.
+
+La consulta del mercado es una muestra acotada, no un listado completo de Binance. La información pública puede variar por región, condiciones del anuncio o disponibilidad del servicio. El perfil de un anunciante utiliza una caché de hasta 30 segundos.
+
+La aplicación se encuentra en fase de pruebas de uso local. La configuración de PostgreSQL y Docker está incluida; no implica que exista una instancia pública desplegada.
+
+## Tecnologías
+
+| Componente | Tecnología |
+| --- | --- |
+| Backend | Python y Django |
+| Frontend | HTML, CSS y JavaScript |
+| Base de datos local | SQLite |
+| Base de datos configurable | PostgreSQL |
+| Pruebas | Suite de Django y workflow de GitHub Actions |
+| Configuración de servidor | Gunicorn, Nginx y Docker Compose |
+
+## Instalación local
+
+### Requisitos
+
+- Python 3.12 o superior y pip.
+- Git para clonar el repositorio.
+- Conexión a Internet para instalar dependencias y consultar Binance.
+
+El frontend no requiere Node.js ni un proceso de compilación.
+
+### Linux / WSL
 
 ```bash
+git clone https://github.com/victorespanaproyectos/monitor-p2p.git
+cd monitor-p2p
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
@@ -68,54 +114,49 @@ python manage.py setup_admin
 python manage.py runserver 127.0.0.1:8000
 ```
 
-También puedes ejecutar `bash iniciar-linux.sh`. Si Ubuntu no incluye venv, instala el paquete python3-venv de tu distribución. El servidor de desarrollo escucha solo localmente.
+Abre [http://127.0.0.1:8000](http://127.0.0.1:8000). El comando `setup_admin` solicita los datos de acceso; no hay una contraseña predefinida.
 
-## Configuración inicial y operadores
+En Ubuntu puede ser necesario instalar `python3-venv` para crear el entorno virtual. Después de clonar el repositorio también se puede iniciar mediante `bash iniciar-linux.sh`.
 
-La instalación empieza con un usuario administrador y un operador llamado **Administrador**, sin órdenes ni dinero de ejemplo. No se crean bancos ni billeteras por defecto. Desde **Inventario -> Agregar cuenta**, crea solo las cuentas que utilizas y después concilia sus saldos reales. Binance conserva su campo único en USDT. Configura su usuario de Binance y comisión en **Operadores y cuentas**.
+### Windows
 
-Desde esa sección puedes crear operadores, asignarles usuarios y agregar/desactivar cuentas. Los nombres de operadores se muestran en el selector del mercado. Los usuarios creados desde esa pantalla son usuarios normales, sin permisos de administrador. Para cambiar o desactivar un usuario existente, el Administrador puede utilizar `/admin/`, sección Usuarios. Las tablas financieras del admin son de inspección: las modificaciones pasan por la aplicación.
+1. Clona el repositorio o descarga y extrae su ZIP.
+2. Instala Python y comprueba que esté disponible con `py -3 --version`.
+3. Ejecuta `iniciar-windows.bat`.
+4. Completa la creación del administrador y abre [http://127.0.0.1:8000](http://127.0.0.1:8000).
 
-Desde Inventario puedes quitar una cuenta con saldo cero y sin órdenes pendientes. Su historial se conserva y puedes reactivarla desde Cuentas quitadas. Deja de aceptar órdenes y movimientos nuevos mientras esté desactivada. Un operador desactivado conserva su historial, pero deja de aparecer entre los activos.
+El iniciador prepara el entorno, instala las dependencias y aplica las migraciones.
 
-## Traer datos de la versión Node.js
+## Primeros pasos
 
-1. Conserva tu instalación anterior y respalda toda su carpeta data.
-2. Crea los operadores de destino (por ejemplo, Victor y Rosiriam) en la nueva aplicación.
-3. Selecciona uno de ellos en el mercado y abre **Órdenes -> Importar JSON**.
-4. Carga su orders.json o el respaldo completo descargado desde la aplicación anterior.
-5. Asigna las cuentas que no coincidan y pulsa **Revisar importación**. Confirma destino, nuevas órdenes, duplicadas y errores.
-6. Confirma la importación. Los saldos ya configurados se mantienen; las operaciones históricas importadas se incorporan a la base de conciliación.
-7. Abre Inventario y guarda los saldos reales actuales de ese operador. Repite para el siguiente.
+1. Inicia sesión y entra en **Operadores y cuentas**.
+2. Configura el nombre del operador, su usuario de Binance y la comisión que corresponda.
+3. Desde **Inventario**, crea las cuentas que utilizas y carga sus saldos.
+4. Selecciona los medios de pago y el monto para consultar el mercado.
+5. Registra una orden pendiente cuando necesites reservar fondos. Complétala o cancélala según el resultado real.
+6. Configura los avisos desde la campana y revisa la evolución en los reportes.
 
-El JSON orders.json contiene referencias a comprobantes, pero no sus bytes. Para recuperar los adjuntos utiliza un respaldo completo con receipt.data. La revisión informa los comprobantes cuyo archivo no está incluido. Los datos nunca se importan automáticamente al instalar.
+El administrador puede crear otros operadores y asignarles usuarios. Las credenciales de usuarios existentes se administran desde `/admin/`.
 
-La importación toma como destino el operador que elegiste y no el nombre del archivo. Las monedas se validan contra la cuenta. Las operaciones antiguas de Airtm con moneda o importes incorrectos deben corregirse antes de importar. El inventario del respaldo no se aplica silenciosamente: guarda los saldos reales después.
+## Datos de demostración
 
-## Demostración del portfolio
+Para cargar ejemplos ficticios en el operador **Administrador**, que debe estar vacío:
 
 ```bash
 python manage.py load_demo
 ```
 
-Solo funciona en el operador Administrador vacío y carga ejemplos ficticios. Configura `P2P_MARKET_DEMO=1` en `.env` para mostrar anuncios simulados, identificados en la interfaz. Nunca publiques tus datos de Binance, comprobantes o respaldos personales.
+Para consultar anuncios simulados, configura esta variable en `.env` y reinicia el servidor:
 
-Para reiniciar una demo publicada utiliza una base separada y restaura una copia de sus datos ficticios; no ejecutes comandos de borrado sobre tu base real. Incluye en tu presentación un recorrido de mercado -> crear orden -> inventario -> movimientos -> estadísticas -> gestión de operadores.
+```env
+P2P_MARKET_DEMO=1
+```
 
-## Base PostgreSQL
+El modo de demostración se identifica en la interfaz. Conviene utilizar una instalación separada para las pruebas y mantener los datos personales fuera del repositorio.
 
-Copia `.env.example` a `.env` y cambia DB_ENGINE a postgresql. Completa DB_NAME, DB_USER, DB_PASSWORD, DB_HOST y DB_PORT, crea esa base y ejecuta `python manage.py migrate` y `python manage.py setup_admin`.
+## Pruebas
 
-### Docker Compose local
-
-1. Copia `.env.example` a `.env`. Define DB_PASSWORD y DJANGO_SECRET_KEY con valores privados.
-2. `docker compose up --build -d`
-3. `docker compose exec web python manage.py setup_admin`
-4. Abre http://127.0.0.1:8000.
-
-Esta configuración está limitada a localhost y usa HTTP para prueba local. Antes de publicarla configura dominio, HTTPS, cookies seguras y hosts de producción. No uses el ejemplo local de Compose como configuración pública sin adaptarlo.
-
-## Pruebas y calidad
+Con el entorno virtual activado:
 
 ```bash
 python manage.py check
@@ -123,28 +164,67 @@ python manage.py makemigrations --check --dry-run
 python manage.py test p2p
 ```
 
-La suite comprueba permisos por operador, CSRF, cálculos FIFO, comisiones, corrección/eliminación de órdenes y movimientos, importación idempotente, conciliación y revisión concurrente, comprobantes y comparación diaria. El workflow de GitHub Actions incluido ejecuta la suite con PostgreSQL cuando subas el proyecto a tu repositorio. El informe de validación de esta entrega está en docs/VALIDACION.md.
+La suite incluye permisos por operador, comisiones y cálculos FIFO, reservas, conciliaciones, importación, comprobantes y validaciones de datos. El repositorio incluye un workflow de GitHub Actions para ejecutar las pruebas con PostgreSQL.
 
-## Publicación
+## Configuración de servidor
 
-Configura DJANGO_DEBUG=0, una DJANGO_SECRET_KEY privada, hosts y orígenes CSRF válidos, PostgreSQL y HTTPS. Sirve `/static/` desde collectstatic con el proxy; ejecuta Gunicorn con 1 worker y 4 threads para esta arquitectura de cache. Si un proxy confiable termina HTTPS, configura DJANGO_TRUST_PROXY=1 y elimina cualquier cabecera X-Forwarded-Proto que venga del cliente. Ejecuta `python manage.py check --deploy`. El servidor runserver es para desarrollo.
+Las variables disponibles están en [`.env.example`](.env.example). La configuración local utiliza SQLite; para PostgreSQL se deben completar las variables `DB_ENGINE`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_HOST` y `DB_PORT`.
 
-## Respaldos
+Para probar Docker Compose localmente:
 
-SQLite: detén el servidor y copia db.sqlite3; conserva también .local-secret o tu configuración de secreto. PostgreSQL: utiliza pg_dump. Los comprobantes están dentro de la base, por lo que se incluyen en el respaldo de base. No incluyas .env, bases ni secretos en Git.
+```bash
+cp .env.example .env
+# Completar DB_PASSWORD y DJANGO_SECRET_KEY en .env antes de continuar.
+docker compose up --build -d
+docker compose exec web python manage.py setup_admin
+```
 
-## Estructura
+El ejemplo de Compose escucha en localhost y utiliza HTTP. Un despliegue público requiere configurar dominio, HTTPS, hosts, orígenes CSRF y cookies seguras, además de desactivar `DJANGO_DEBUG`.
 
-- config: configuración y rutas.
-- p2p/models.py: modelo relacional y restricciones.
-- p2p/services.py: cálculos Decimal e inventario.
-- p2p/views.py: endpoints, validación y permisos.
-- p2p/importing.py: importación revisada.
-- p2p/market.py: cliente Binance, cache y demo.
-- p2p/tests.py: pruebas automáticas.
-- static y templates: interfaz, acceso y modales.
-- docs: arquitectura, API y validación.
+Los archivos estáticos se preparan con `collectstatic` y se sirven desde el proxy. La arquitectura actual mantiene la caché en memoria y está planteada para Gunicorn con un worker y cuatro threads. `runserver` se reserva para desarrollo.
 
-## Portfolio y autoría
+Antes de un despliegue:
 
-Describe el problema, decisiones de diseño, cálculos y pruebas. Si utilizaste IA para desarrollar, puedes indicarlo: «Proyecto desarrollado con asistencia de IA, con definición de requisitos y validación funcional propia». Estudia las partes que presentes para poder explicarlas en una entrevista.
+```bash
+python manage.py check --deploy
+```
+
+## Respaldos y actualizaciones
+
+La aplicación permite descargar un respaldo JSON de los registros del operador, con los comprobantes disponibles.
+
+Para conservar una instalación local completa con SQLite, detén el servidor y guarda `db.sqlite3`, `.local-secret` y `.env`, si existe. Los comprobantes se almacenan en la base de datos. Para PostgreSQL, utiliza un respaldo con `pg_dump`.
+
+Antes de actualizar, conserva una copia de la instalación y aplica las migraciones pendientes. Las bases de datos, credenciales y archivos de configuración privados están excluidos mediante `.gitignore`.
+
+## Estructura del proyecto
+
+```text
+config/             Configuración de Django y rutas
+p2p/models.py       Modelos y restricciones
+p2p/services.py     Cálculos, inventario y reglas de negocio
+p2p/views.py        Endpoints, validaciones y permisos
+p2p/market.py       Consultas públicas de Binance y caché
+p2p/importing.py    Revisión e importación de registros
+p2p/tests.py        Pruebas automatizadas
+static/             Interfaz y recursos del frontend
+templates/          Plantillas de acceso y páginas
+.github/workflows/  Automatización de pruebas
+deploy/             Configuración de Nginx
+docs/               Documentación técnica y funcional
+```
+
+## Documentación
+
+- [Arquitectura](docs/ARQUITECTURA.md)
+- [API](docs/API.md)
+- [Cuentas e inventario](docs/CUENTAS-1.2.md)
+- [Anunciantes y filtro por monto](docs/MERCADO-1.3.md)
+- [Notificaciones](docs/NOTIFICACIONES-1.4.md)
+- [Estados de órdenes, gastos y conciliación](docs/FASE-1.md)
+- [Iconos y fuentes](docs/ICONOS.md)
+- [Validación técnica](docs/VALIDACION.md)
+
+## Autor
+
+**Víctor España** · [GitHub](https://github.com/victorespanaproyectos)

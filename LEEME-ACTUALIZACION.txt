@@ -1,8 +1,0 @@
-VERSIÓN 1.4.2 — NOTIFICACIONES
-
-Detén la versión anterior y haz una copia de su carpeta.
-Extrae este proyecto en otra carpeta y copia tus archivos db.sqlite3, .local-secret y .env (si existe) a la raíz.
-Ejecuta iniciar-windows.bat o iniciar-linux.sh.
-
-No se incluye base de datos ni credenciales en el ZIP.
-Consulta docs/NOTIFICACIONES-1.4.md para configurar la campana y probar cambios de tu anuncio.
